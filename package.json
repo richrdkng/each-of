@@ -1,0 +1,24 @@
+{
+  "name": "eachof",
+  "version": "1.0.0",
+  "description": "Nothing so far",
+  "main": "index.js",
+  "scripts": {
+    "gulp": "gulp --gulpfile task/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://richrdkng@github.com/richrdkng/eachof.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/richrdkng/eachof/issues"
+  },
+  "homepage": "https://github.com/richrdkng/eachof#readme",
+  "devDependencies": {
+    "gulp": "^3.8.11",
+    "gulp-debug": "^2.0.1",
+    "gulp-mocha": "^2.1.0"
+  }
+}
