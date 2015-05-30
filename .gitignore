@@ -1,3 +1,9 @@
+# WebStorm project folder
+.idea
+
+# Node modules/vendors
+node_modules
+
 # Logs
 logs
 *.log
