@@ -73,7 +73,7 @@ module.exports = {
     devDependencies: devDependencies,
     keywords:        keywords,
 
-    primary:         path.normalize(root + '/src/eachof.js'),
+    script:          path.normalize(root + '/src/eachof.js'),
     path:            {
         root:        root,
         master:      root,

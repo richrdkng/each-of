@@ -4,7 +4,8 @@
   "description": "Nothing so far",
   "main": "index.js",
   "scripts": {
-    "gulp": "gulp --gulpfile task/index.js"
+    "gulp": "gulp --gulpfile task/index.js",
+    "test": "iojs dist/app"
   },
   "repository": {
     "type": "git",
@@ -17,6 +18,7 @@
   },
   "homepage": "https://github.com/richrdkng/eachof#readme",
   "devDependencies": {
+    "app-module-path": "^1.0.2",
     "gulp": "^3.8.11",
     "gulp-debug": "^2.0.1",
     "gulp-mocha": "^2.1.0"

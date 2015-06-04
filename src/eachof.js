@@ -13,6 +13,8 @@
     }
 }(this, function (exports) {
 */
+var log = console.log.bind(console);
+
     function isArrayLike(object) {
         switch(object ? object.constructor : 0) {
             case Array:
@@ -40,7 +42,12 @@
 
         if (isArrayLike(collection)) {
             index = collection.length;
-            while(index--) {
+
+            if (index === 0) {
+                return false;
+            }
+
+            while (index--) {
                 if (collection[index] !== condition) {
                     return false;
                 }
@@ -48,6 +55,7 @@
 
         } else if (isPlainObject(collection)) {
             length = 0;
+
             for (var element in collection) {
                 if (collection.hasOwnProperty(element)) {
                     if (collection.element !== condition) {
@@ -56,12 +64,10 @@
                     ++length;
                 }
             }
-        }
 
-        console.log(index, length);
-
-        if (index < 1 || length < 1) {
-            return false;
+            if (length === 0) {
+                return false;
+            }
         }
 
         return true;
