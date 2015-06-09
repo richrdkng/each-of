@@ -487,6 +487,23 @@ describe('eachof ->', function() {
             should.beFalse( eachof(empty.array, '')        );
         });
 
+        it('should return false, when the array doesn\'t contain the condition (primitive type)', function() {
+            should.beFalse( eachof(array.same.with.one.boolean.true,     false) );
+            should.beFalse( eachof(array.same.with.one.integer.one,      0)     );
+            should.beFalse( eachof(array.same.with.one.integer.nan,      0)     );
+            should.beFalse( eachof(array.same.with.one.integer.infinity, 0)     );
+
+            should.beFalse( eachof(array.same.with.two.boolean.trues,      false) );
+            should.beFalse( eachof(array.same.with.two.integer.ones,       0)     );
+            should.beFalse( eachof(array.same.with.two.integer.nans,       0)     );
+            should.beFalse( eachof(array.same.with.two.integer.infinities, 0)     );
+
+            should.beFalse( eachof(array.same.with.three.boolean.trues,      false) );
+            should.beFalse( eachof(array.same.with.three.integer.ones,       0)     );
+            should.beFalse( eachof(array.same.with.three.integer.nans,       0)     );
+            should.beFalse( eachof(array.same.with.three.integer.infinities, 0)     );
+        });
+
         it('should return true, when the array contains the condition (primitive type)', function() {
             should.beTrue( eachof(array.same.with.one.boolean.true,     true)     );
             should.beTrue( eachof(array.same.with.one.integer.one,      1)        );
