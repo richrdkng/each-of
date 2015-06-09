@@ -16,6 +16,7 @@
 
 // TODO: IE8 compatibility
 // TODO: strict vs regular equality
+// TODO: function as a condition
 // TODO: multiple conditions / array condition / object condition / array-like condition
 // TODO: UMD
 /* TODO: NaN check:
@@ -25,42 +26,21 @@
 
 var log = console.log.bind(console);
 
-    function eachof(collection, condition) {
-        var matches = false,
-            length = 0;
-
-        // When no condition was given or called without parameters, return false
-        if (arguments.length < 2) {
-            return false;
-        }
-
-        var collectionIsNaN = collection !== collection,
-            conditionIsNaN  = condition !== condition;
-
-        // When the collection is NaN, but the condition isn't, then return false
-        if (collectionIsNaN && !collectionIsNaN) {
-            return false;
-        }
-
-        // When the collection and the condition are both NaNs, as they are certainly equal, return true
-        if (collectionIsNaN && conditionIsNaN) {
-            return true;
-        }
-
-        // If it is a collection
+    function asCollection(collection) {
         if (collection && typeof collection === 'object') {
             var isArrayLike,
+                length,
                 element;
 
             if (collection.constructor === Array) {
                 isArrayLike = true;
-                //log('isArrayLike');
+                length = collection.length;
 
             } else if (collection.constructor === Object) {
                 isArrayLike = true;
+                length = 0;
 
                 var tempCollection = [];
-                length = 0;
 
                 for (element in collection) {
                     if (collection.hasOwnProperty(element)) {
@@ -82,56 +62,76 @@ var log = console.log.bind(console);
                     case Float32Array:
                     case Float64Array:
                         isArrayLike = true;
+                        break;
                     default:
                         isArrayLike = Object.prototype.toString.call(collection) === '[object Arguments]';
                 }
+
+                length = collection.length;
             }
 
             if (!isArrayLike) {
                 return false;
             }
 
-            //log('it is array-like');
-            length = collection.length;
-
             if (length === 0) {
-                //log("if (length === 0) {");
                 return false;
             }
 
-            matches = true;
+            return collection;
+        }
+        return false;
+    }
 
-            for (var i = 0; i < length; ++i) {
-                element = collection[i];
+    function eachof(collection, condition) {
+        var coll,
+            cond;
+
+        // When no condition was given or called without parameters, return false
+        if (arguments.length < 2) {
+            return false;
+        }
+
+        var collectionIsNaN = collection !== collection,
+            conditionIsNaN  = condition !== condition;
+
+        // When the collection is NaN, but the condition isn't, then return false
+        if (collectionIsNaN && !collectionIsNaN) {
+            return false;
+        }
+
+        // When the collection and the condition are both NaNs, as they are certainly equal, return true
+        if (collectionIsNaN && conditionIsNaN) {
+            return true;
+        }
+
+        // If it is a collection
+        if (coll = asCollection(collection)) {
+            for (var i = 0, length = coll.length, element; i < length; ++i) {
+                element = coll[i];
 
                 // Check, whether the element is NOT NaN, as if the element is equal to itself, it is not NaN
                 if (element === element) {
                     if (!conditionIsNaN) {
                         if (element !== condition) {
-                            matches = false;
-                            break;
+                            return false;
                         }
                     } else {
-                        matches = false;
-                        break;
+                        return false;
                     }
 
-                // If the element is NaN
+                // Otherwise the element is NaN
                 } else {
                     if (!conditionIsNaN) {
-                        matches = false;
-                        break;
+                        return false;
                     }
                 }
             }
 
-            //log('matches:', matches);
-
-            return matches;
-
+            return true;
         }
 
-        // If it is not a collection, then handle it as if it were a strict equality check
+        // Otherwise it is not a collection, then handle it as if it were a strict equality check
         return collection === condition;
     }
 
