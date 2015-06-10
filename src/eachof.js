@@ -26,21 +26,40 @@
 
 var log = console.log.bind(console);
 
-    function asCollection(collection) {
+    function isCollection(collection) {
+        var fulfills = false;
+
         if (collection && typeof collection === 'object') {
-            var isArrayLike,
-                length,
-                element;
 
-            if (collection.constructor === Array) {
-                isArrayLike = true;
-                length = collection.length;
+            switch(collection.constructor) {
+                case Array:
+                case Object:
+                case Int8Array:
+                case Uint8Array:
+                case Uint8ClampedArray:
+                case Int16Array:
+                case Uint16Array:
+                case Int32Array:
+                case Uint32Array:
+                case Float32Array:
+                case Float64Array:
+                    fulfills = true;
+                    break;
 
-            } else if (collection.constructor === Object) {
-                isArrayLike = true;
-                length = 0;
+                default:
+                    fulfills = Object.prototype.toString.call(collection) === '[object Arguments]';
+            }
+        }
 
-                var tempCollection = [];
+        return fulfills;
+    }
+
+    function asCollection(collection) {
+
+        if (collection.constructor === Object) {
+            var element,
+                length         = 0,
+                tempCollection = [];
 
                 for (element in collection) {
                     if (collection.hasOwnProperty(element)) {
@@ -49,43 +68,13 @@ var log = console.log.bind(console);
                 }
 
                 collection = tempCollection;
-
-            } else {
-                switch(collection.constructor) {
-                    case Int8Array:
-                    case Uint8Array:
-                    case Uint8ClampedArray:
-                    case Int16Array:
-                    case Uint16Array:
-                    case Int32Array:
-                    case Uint32Array:
-                    case Float32Array:
-                    case Float64Array:
-                        isArrayLike = true;
-                        break;
-                    default:
-                        isArrayLike = Object.prototype.toString.call(collection) === '[object Arguments]';
-                }
-
-                length = collection.length;
-            }
-
-            if (!isArrayLike) {
-                return false;
-            }
-
-            if (length === 0) {
-                return false;
-            }
-
-            return collection;
         }
-        return false;
+
+        return collection;
     }
 
     function eachof(collection, condition) {
-        var coll,
-            cond;
+        var conditionIsCollection;
 
         // When no condition was given or called without parameters, return false
         if (arguments.length < 2) {
@@ -105,16 +94,50 @@ var log = console.log.bind(console);
             return true;
         }
 
+        if (isCollection(condition)) {
+            conditionIsCollection = true;
+
+            condition = asCollection(condition);
+            if (condition.length === 0) {
+                return false;
+            }
+        }
+
         // If it is a collection
-        if (coll = asCollection(collection)) {
-            for (var i = 0, length = coll.length, element; i < length; ++i) {
-                element = coll[i];
+        if (isCollection(collection)) {
+
+            collection = asCollection(collection);
+
+            if (collection.length === 0) {
+                return false;
+            }
+
+            for (var i = 0, length = collection.length, element; i < length; ++i) {
+                element = collection[i];
 
                 // Check, whether the element is NOT NaN, as if the element is equal to itself, it is not NaN
                 if (element === element) {
                     if (!conditionIsNaN) {
-                        if (element !== condition) {
-                            return false;
+                        // If the condition is non-collection
+                        if (!conditionIsCollection) {
+                            if (element !== condition) {
+                                return false;
+                            }
+                        } else {
+                            for (var j = 0, len = condition.length, el; j < len; ++j) {
+                                el = condition[j];
+
+                                // If whether it is not NaN
+                                if (el === el) {
+                                    if (element !== el) {
+                                        return false;
+                                    }
+
+                                // If the current element of the condition is NaN, but the current element of the
+                                } else {
+                                    return false;
+                                }
+                            }
                         }
                     } else {
                         return false;
@@ -134,152 +157,6 @@ var log = console.log.bind(console);
         // Otherwise it is not a collection, then handle it as if it were a strict equality check
         return collection === condition;
     }
-
-    /*
-    function eachof(collection, condition) {
-        var matches = false,
-            length = 0;
-
-        // When no condition was given or called without parameters, return false
-        if (arguments.length < 2) {
-            return false;
-        }
-
-        var collectionIsNaN = collection !== collection,
-            conditionIsNaN  = condition !== condition;
-
-        // When the collection is NaN, but the condition isn't, then return false
-        if (collectionIsNaN && !collectionIsNaN) {
-            return false;
-        }
-
-        // When the collection and the condition are both NaNs, as they are certainly equal, return true
-        if (collectionIsNaN && conditionIsNaN) {
-            return true;
-        }
-
-        // If it is a collection
-        if (collection && typeof collection === 'object') {
-            var isArrayLike;
-
-            if (collection.constructor === Array) {
-                isArrayLike = true;
-                //log('isArrayLike');
-
-            } else if (collection.constructor === Object) {
-                matches = true;
-
-                for (var element in collection) {
-                    if (collection.hasOwnProperty(element)) {
-                        element = collection[element];
-
-                        // Check, whether the element is NOT NaN, as if the element is equal to itself, it is not NaN
-                        if (element === element) {
-                            if (!conditionIsNaN) {
-                                if (element !== condition) {
-                                    matches = false;
-                                    break;
-                                }
-                            } else {
-                                matches = false;
-                                break;
-                            }
-
-                        // If the element is NaN
-                        } else {
-                            if (!conditionIsNaN) {
-                                matches = false;
-                                break;
-
-                            // If the element and the condition are both NaNs, they are equal
-                            } else {
-                                matches = true;
-                            }
-                        }
-
-                        ++length;
-                    }
-                }
-
-                if (length === 0) {
-                    matches = false;
-                }
-
-                return matches;
-
-            } else {
-                switch(collection.constructor) {
-                    case Int8Array:
-                    case Uint8Array:
-                    case Uint8ClampedArray:
-                    case Int16Array:
-                    case Uint16Array:
-                    case Int32Array:
-                    case Uint32Array:
-                    case Float32Array:
-                    case Float64Array:
-                        isArrayLike = true;
-                    default:
-                        isArrayLike = Object.prototype.toString.call(collection) === '[object Arguments]';
-                }
-            }
-
-            if (!isArrayLike) {
-                //log("if (!isArrayLike) {");
-                return false;
-            }
-
-            //log('it is array-like');
-
-            length = collection.length;
-
-            if (length === 0) {
-                //log("if (length === 0) {");
-                return false;
-            }
-
-            matches = true;
-
-            for (var i = 0, element; i < length; ++i) {
-                element = collection[i];
-
-                // Check, whether the element is NOT NaN, as if the element is equal to itself, it is not NaN
-                if (element === element) {
-                    if (!conditionIsNaN) {
-                        if (element !== condition) {
-                            matches = false;
-                            break;
-                        }
-                    } else {
-                        matches = false;
-                        break;
-                    }
-
-                // If the element is NaN
-                } else {
-                    if (!conditionIsNaN) {
-                        matches = false;
-                        break;
-
-                    // If the element and the condition are both NaNs, they are equal
-                    } else {
-                        matches = true;
-                    }
-                }
-            }
-
-            //log('matches:', matches);
-
-            return matches;
-
-        // If it is not a collection, then handle it as if it were a strict equality check
-        } else {
-            return collection === condition;
-        }
-
-        return matches;
-    };
-    */
 
     module.exports = eachof;
 
