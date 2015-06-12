@@ -1,31 +1,31 @@
-/*(function (root, factory) {
-    if (typeof define === 'function' && define.amd) {
-        // AMD. Register as an anonymous module.
-        define(['exports'], function (exports) {
-            factory((root.commonJsStrictGlobal = exports));
-        });
-    } else if (typeof exports === 'object') {
-        // CommonJS
-        factory(exports);
-    } else {
-        // Browser globals
-        factory((root.commonJsStrictGlobal = {}));
-    }
-}(this, function (exports) {
-*/
-
 // TODO: IE8 compatibility
 // TODO: strict vs regular equality
 // TODO: recursive checking
 // TODO: function as a condition
 // TODO: multiple conditions / array condition / object condition / array-like condition
-// TODO: UMD
+// TODO: updated UMD
 /* TODO: NaN check:
     - when it is in a collection,
     - also when it is the condition
 */
 
 var log = console.log.bind(console);
+
+(function (root, factory) {
+    // For Node.js or CommonJS compatible loaders
+    if (typeof module === 'object' && module.exports) {
+        module.exports = factory();
+
+    // AMD - Anonymous module for RequireJS and compatible
+    } else if (typeof define === 'function' && define.amd) {
+        define(factory);
+
+    // For using in the browser directly
+    } else {
+        root.eachof = factory();
+    }
+}(this, function () {
+    "use strict";
 
     function isCollection(collection) {
         var fulfills = false;
@@ -132,10 +132,5 @@ var log = console.log.bind(console);
         return isEqual(collection, condition);
     }
 
-    module.exports = eachof;
-
-/*
-    //exports = eachof;
     return eachof;
 }));
-*/
