@@ -1,18 +1,31 @@
 var project = require('../project'),
     eachof  = require(project.script),
-    assert  = require('assert'),
-    should  = {
-        beTrue  : function(result) {
-            assert.strictEqual(result, true);
-        },
-        beFalse : function(result) {
-            assert.strictEqual(result, false);
-        }
-    },
-    xshould = {
-        beTrue  : function() {},
-        beFalse : function() {}
-    },
+    should  = (function() {
+        var should_js = require('should');
+
+        return new function should() {
+            return function(result) {
+                return {
+                    beTrue  : function() {
+                        should_js.strictEqual(result, true);
+                    },
+                    beFalse : function() {
+                        should_js.strictEqual(result, false);
+                    }
+                };
+            }
+        };
+    })(),
+    xshould = (function() {
+        return new function xshould() {
+            return function(result) {
+                return {
+                    beTrue  : function() {},
+                    beFalse : function() {}
+                };
+            }
+        };
+    })(),
     log     = console.log.bind(console);
 
 describe('eachof ->', function() {
@@ -422,147 +435,162 @@ describe('eachof ->', function() {
         };
 
     it('should return false, when called without parameters (no parameters)', function() {
-        should.beFalse( eachof() );
+        should( eachof() )               .beFalse();
+        should( eachof(empty.array) )    .beFalse();
+        should( eachof(empty.object) )   .beFalse();
+        should( eachof(empty.arguments) ).beFalse();
     });
 
     it('should return false, when called without a condition (1 parameter)', function() {
-        should.beFalse( eachof(undefined)    );
-        should.beFalse( eachof(null)         );
-        should.beFalse( eachof(empty.array)  );
-        should.beFalse( eachof(empty.object) );
+        should( eachof(undefined) )   .beFalse();
+        should( eachof(null) )        .beFalse();
+        should( eachof(empty.array) ) .beFalse();
+        should( eachof(empty.object) ).beFalse();
+    });
+
+    describe('for fundamental cases', function() {
+        describe('for non-collections', function() {
+            it('should return false, when the passed non-collection does not match with the condition', function() {
+
+            });
+
+            it('should return true, when the passed non-collection does match with the condition', function() {
+
+            });
+        });
+
+        describe('for arrays', function() {
+            it('should return false, when an empty array was passed ( [] ), regardless of the condition', function() {
+                should( eachof(empty.array))            .beFalse();
+                should( eachof(empty.array, undefined) ).beFalse();
+                should( eachof(empty.array, null) )     .beFalse();
+                should( eachof(empty.array, true) )     .beFalse();
+                should( eachof(empty.array, 1) )        .beFalse();
+                should( eachof(empty.array, '') )       .beFalse();
+            });
+
+            it('should return false, when the array doesn\'t contain the condition (primitive type)', function() {
+                should( eachof(array.same.with.one.boolean.true,     false)).beFalse();
+                should( eachof(array.same.with.one.integer.one,      0) )   .beFalse();
+                should( eachof(array.same.with.one.integer.nan,      0) )   .beFalse();
+                should( eachof(array.same.with.one.integer.infinity, 0) )   .beFalse();
+
+                should( eachof(array.same.with.two.boolean.trues,      false) ).beFalse();
+                should( eachof(array.same.with.two.integer.ones,       0) )    .beFalse();
+                should( eachof(array.same.with.two.integer.nans,       0) )    .beFalse();
+                should( eachof(array.same.with.two.integer.infinities, 0) )    .beFalse();
+
+                should( eachof(array.same.with.three.boolean.trues,      false) ).beFalse();
+                should( eachof(array.same.with.three.integer.ones,       0) )    .beFalse();
+                should( eachof(array.same.with.three.integer.nans,       0) )    .beFalse();
+                should( eachof(array.same.with.three.integer.infinities, 0) )    .beFalse();
+            });
+
+            it('should return true, when the array contains the condition (primitive type)', function() {
+                should( eachof(array.same.with.one.boolean.true,     true) )    .beTrue();
+                should( eachof(array.same.with.one.integer.one,      1) )       .beTrue();
+                should( eachof(array.same.with.one.integer.nan,      NaN) )     .beTrue();
+                should( eachof(array.same.with.one.integer.infinity, Infinity) ).beTrue();
+
+                should( eachof(array.same.with.two.boolean.trues,      true) )    .beTrue();
+                should( eachof(array.same.with.two.integer.ones,       1) )       .beTrue();
+                should( eachof(array.same.with.two.integer.nans,       NaN) )     .beTrue();
+                should( eachof(array.same.with.two.integer.infinities, Infinity) ).beTrue();
+
+                should( eachof(array.same.with.three.boolean.trues,      true) )    .beTrue();
+                should( eachof(array.same.with.three.integer.ones,       1) )       .beTrue();
+                should( eachof(array.same.with.three.integer.nans,       NaN) )     .beTrue();
+                should( eachof(array.same.with.three.integer.infinities, Infinity) ).beTrue();
+            });
+
+        });
+        describe('for plain objects', function() {
+            it('should return false, when an empty object was passed ( {} ), regardless of the condition', function() {
+                should( eachof(empty.object) )           .beFalse();
+                should( eachof(empty.object, undefined) ).beFalse();
+                should( eachof(empty.object, null) )     .beFalse();
+                should( eachof(empty.object, true) )     .beFalse();
+                should( eachof(empty.object, 1) )        .beFalse();
+                should( eachof(empty.object, '') )       .beFalse();
+            });
+
+            it('should return true, when the object contains the condition (primitive type)', function() {
+                should( eachof(object.same.with.one.boolean.true,     true) )    .beTrue();
+                should( eachof(object.same.with.one.integer.one,      1) )       .beTrue();
+                should( eachof(object.same.with.one.integer.nan,      NaN) )     .beTrue();
+                should( eachof(object.same.with.one.integer.infinity, Infinity) ).beTrue();
+
+                should( eachof(object.same.with.two.boolean.trues,      true) )    .beTrue();
+                should( eachof(object.same.with.two.integer.ones,       1) )       .beTrue();
+                should( eachof(object.same.with.two.integer.nans,       NaN) )     .beTrue();
+                should( eachof(object.same.with.two.integer.infinities, Infinity) ).beTrue();
+
+                should( eachof(object.same.with.three.boolean.trues,      true) )    .beTrue();
+                should( eachof(object.same.with.three.integer.ones,       1) )       .beTrue();
+                should( eachof(object.same.with.three.integer.nans,       NaN) )     .beTrue();
+                should( eachof(object.same.with.three.integer.infinities, Infinity) ).beTrue();
+            });
+        });
+        describe('for array-like objects', function() {
+            it('should return false, when an empty array-like was passed, regardless of the condition', function() {
+                should( eachof(empty.typedArray.Int8Array,         1) ) .beFalse();
+                should( eachof(empty.typedArray.Uint8Array,        1) ) .beFalse();
+                should( eachof(empty.typedArray.Uint8ClampedArray, 1) ) .beFalse();
+                should( eachof(empty.typedArray.Int16Array,        1) ) .beFalse();
+                should( eachof(empty.typedArray.Uint16Array,       1) ) .beFalse();
+                should( eachof(empty.typedArray.Int32Array,        1) ) .beFalse();
+                should( eachof(empty.typedArray.Uint32Array,       1) ) .beFalse();
+                should( eachof(empty.typedArray.Float32Array,      .5) ).beFalse();
+                should( eachof(empty.typedArray.Float64Array,      .5) ).beFalse();
+                should( eachof(empty.arguments,                    1) ) .beFalse();
+            });
+        });
     });
 
     describe('for edge cases', function() {
         describe('when NaNs are invovled', function() {
             it('should return true, when the collection and the condition both are NaNs', function() {
-                should.beTrue( eachof(NaN, NaN) );
+                should( eachof(NaN, NaN)).beTrue();
             });
             it('should return false, when the collection is NaN, but the condition isn\'t', function() {
-                should.beFalse( eachof(NaN, true) );
+                should( eachof(NaN, true)).beFalse();
             });
         });
 
         describe('when the collection and the condition both are primitives', function() {
             it('should return true, when they are scrictly equal to each other ( === )', function() {
-                should.beTrue( eachof(undefined, undefined) );
-                should.beTrue( eachof(null,      null)      );
-                should.beTrue( eachof(0,         0)         );
-                should.beTrue( eachof(-1,        -1)        );
-                should.beTrue( eachof(1,         1)         );
-                should.beTrue( eachof(true,      true)      );
-                should.beTrue( eachof(false,     false)     );
-                should.beTrue( eachof('',        '')        );
+                should( eachof(undefined, undefined) ).beTrue();
+                should( eachof(null,      null) )     .beTrue();
+                should( eachof(0,         0) )        .beTrue();
+                should( eachof(-1,        -1) )       .beTrue();
+                should( eachof(1,         1) )        .beTrue();
+                should( eachof(true,      true) )     .beTrue();
+                should( eachof(false,     false) )    .beTrue();
+                should( eachof('',        '') )       .beTrue();
             });
 
             it('should return false, when they are scrictly not equal to each other ( !== )', function() {
-                should.beFalse( eachof(undefined, null)      );
-                should.beFalse( eachof(null,      undefined) );
-                should.beFalse( eachof(0,         '0')       );
-                should.beFalse( eachof(-1,        '-1')      );
-                should.beFalse( eachof(1,         '1')       );
-                should.beFalse( eachof(true,      1)         );
-                should.beFalse( eachof(false,     0)         );
-                should.beFalse( eachof('',        0)         );
+                should( eachof(undefined, null) )     .beFalse();
+                should( eachof(null,      undefined) ).beFalse();
+                should( eachof(0,         '0') )      .beFalse();
+                should( eachof(-1,        '-1') )     .beFalse();
+                should( eachof(1,         '1') )      .beFalse();
+                should( eachof(true,      1) )        .beFalse();
+                should( eachof(false,     0) )        .beFalse();
+                should( eachof('',        0) )        .beFalse();
+                should( eachof('',        0) )        .beFalse();
             });
         });
     });
 
-    describe('for non-collections', function() {
-        it('should return false, when the passed non-collection does not match with the condition', function() {
+    describe('for practical cases', function() {
+        it('should return true', function() {
+            var array = [1, 1, 1, 1, 1];
 
-        });
-
-        it('should return true, when the passed non-collection does match with the condition', function() {
-
-        });
-    });
-
-    describe('for arrays', function() {
-        it('should return false, when an empty array was passed ( [] ), regardless of the condition', function() {
-            should.beFalse( eachof(empty.array)            );
-            should.beFalse( eachof(empty.array, undefined) );
-            should.beFalse( eachof(empty.array, null)      );
-            should.beFalse( eachof(empty.array, true)      );
-            should.beFalse( eachof(empty.array, 1)         );
-            should.beFalse( eachof(empty.array, '')        );
-        });
-
-        it('should return false, when the array doesn\'t contain the condition (primitive type)', function() {
-            should.beFalse( eachof(array.same.with.one.boolean.true,     false) );
-            should.beFalse( eachof(array.same.with.one.integer.one,      0)     );
-            should.beFalse( eachof(array.same.with.one.integer.nan,      0)     );
-            should.beFalse( eachof(array.same.with.one.integer.infinity, 0)     );
-
-            should.beFalse( eachof(array.same.with.two.boolean.trues,      false) );
-            should.beFalse( eachof(array.same.with.two.integer.ones,       0)     );
-            should.beFalse( eachof(array.same.with.two.integer.nans,       0)     );
-            should.beFalse( eachof(array.same.with.two.integer.infinities, 0)     );
-
-            should.beFalse( eachof(array.same.with.three.boolean.trues,      false) );
-            should.beFalse( eachof(array.same.with.three.integer.ones,       0)     );
-            should.beFalse( eachof(array.same.with.three.integer.nans,       0)     );
-            should.beFalse( eachof(array.same.with.three.integer.infinities, 0)     );
-        });
-
-        it('should return true, when the array contains the condition (primitive type)', function() {
-            should.beTrue( eachof(array.same.with.one.boolean.true,     true)     );
-            should.beTrue( eachof(array.same.with.one.integer.one,      1)        );
-            should.beTrue( eachof(array.same.with.one.integer.nan,      NaN)      );
-            should.beTrue( eachof(array.same.with.one.integer.infinity, Infinity) );
-
-            should.beTrue( eachof(array.same.with.two.boolean.trues,      true)     );
-            should.beTrue( eachof(array.same.with.two.integer.ones,       1)        );
-            should.beTrue( eachof(array.same.with.two.integer.nans,       NaN)      );
-            should.beTrue( eachof(array.same.with.two.integer.infinities, Infinity) );
-
-            should.beTrue( eachof(array.same.with.three.boolean.trues,      true)     );
-            should.beTrue( eachof(array.same.with.three.integer.ones,       1)        );
-            should.beTrue( eachof(array.same.with.three.integer.nans,       NaN)      );
-            should.beTrue( eachof(array.same.with.three.integer.infinities, Infinity) );
-        });
-
-        xit('should return false, when the passed array does not contain the condition', function() {
-        });
-    });
-    describe('for plain objects', function() {
-        it('should return false, when an empty object was passed ( {} ), regardless of the condition', function() {
-            should.beFalse( eachof(empty.object)            );
-            should.beFalse( eachof(empty.object, undefined) );
-            should.beFalse( eachof(empty.object, null)      );
-            should.beFalse( eachof(empty.object, true)      );
-            should.beFalse( eachof(empty.object, 1)         );
-            should.beFalse( eachof(empty.object, '')        );
-        });
-
-        it('should return true, when the object contains the condition (primitive type)', function() {
-            should.beTrue( eachof(object.same.with.one.boolean.true,     true)     );
-            should.beTrue( eachof(object.same.with.one.integer.one,      1)        );
-            should.beTrue( eachof(object.same.with.one.integer.nan,      NaN)      );
-            should.beTrue( eachof(object.same.with.one.integer.infinity, Infinity) );
-
-            should.beTrue( eachof(object.same.with.two.boolean.trues,      true)     );
-            should.beTrue( eachof(object.same.with.two.integer.ones,       1)        );
-            should.beTrue( eachof(object.same.with.two.integer.nans,       NaN)      );
-            should.beTrue( eachof(object.same.with.two.integer.infinities, Infinity) );
-
-            should.beTrue( eachof(object.same.with.three.boolean.trues,      true)     );
-            should.beTrue( eachof(object.same.with.three.integer.ones,       1)        );
-            should.beTrue( eachof(object.same.with.three.integer.nans,       NaN)      );
-            should.beTrue( eachof(object.same.with.three.integer.infinities, Infinity) );
-        });
-    });
-    describe('for array-like objects', function() {
-        it('should return false, when an empty array-like was passed, regardless of the condition', function() {
-            should.beFalse( eachof(empty.typedArray.Int8Array,         1)  );
-            should.beFalse( eachof(empty.typedArray.Uint8Array,        1)  );
-            should.beFalse( eachof(empty.typedArray.Uint8ClampedArray, 1)  );
-            should.beFalse( eachof(empty.typedArray.Int16Array,        1)  );
-            should.beFalse( eachof(empty.typedArray.Uint16Array,       1)  );
-            should.beFalse( eachof(empty.typedArray.Int32Array,        1)  );
-            should.beFalse( eachof(empty.typedArray.Uint32Array,       1)  );
-            should.beFalse( eachof(empty.typedArray.Float32Array,      .5) );
-            should.beFalse( eachof(empty.typedArray.Float64Array,      .5) );
-            should.beFalse( eachof(empty.arguments,                    1)  );
+            //xshould( true ).beFalse();
+            //should( eachof(array, 1          ), true );
+            //should( eachof(array, '1'       ), false );
+            //should( eachof(array, '1', false), false );
         });
     });
 });
