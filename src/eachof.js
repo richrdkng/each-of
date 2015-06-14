@@ -1,5 +1,4 @@
 // TODO: IE8 compatibility
-// TODO: strict vs regular equality
 // TODO: recursive checking
 // TODO: function as a condition
 // TODO: multiple conditions / array condition / object condition / array-like condition
@@ -74,9 +73,10 @@ var log = console.log.bind(console);
         return collection;
     }
 
-    function isEqual(element, condition) {
-        var elementIsNaN   = element !== element,
-            conditionIsNaN = condition !== condition;
+    function isEqual(element, condition, strictEquality) {
+        var elementIsNaN        = element !== element,
+            conditionIsNaN      = condition !== condition,
+            conditionIsFunction = typeof condition === 'function';
 
         // When the element is NaN, but the condition isn't, then return false
         if (elementIsNaN && !conditionIsNaN) {
@@ -88,15 +88,28 @@ var log = console.log.bind(console);
             return true;
         }
 
-        // If the are strictly equal, return true
-        if (element === condition) {
-            return true;
+        if (strictEquality) {
+            // If they are strictly equal, return true
+            if (element === condition) {
+                return true;
+            }
+        } else {
+            // If they are equal, return true
+            if (element == condition) {
+                return true;
+            }
         }
 
         if (isCollection(condition)) {
             for (var i = 0, length = condition.length; i < length; ++i) {
-                if (element === condition[i]) {
-                    return true;
+                if (strictEquality) {
+                    if (element === condition[i]) {
+                        return true;
+                    }
+                } else {
+                    if (element == condition[i]) {
+                        return true;
+                    }
                 }
             }
         }
@@ -104,12 +117,14 @@ var log = console.log.bind(console);
         return false;
     }
 
-    function eachof(collection, condition) {
+    function eachof(collection, condition, strictEquality) {
 
         // When no condition was given or called without parameters, return false
         if (arguments.length < 2) {
             return false;
         }
+
+        strictEquality = typeof strictEquality === 'boolean' ? strictEquality : true;
 
         // If it is a collection
         if (isCollection(collection)) {
@@ -120,7 +135,7 @@ var log = console.log.bind(console);
             }
 
             for (var i = 0, length = collection.length; i < length; ++i) {
-                if (!isEqual(collection[i], condition)) {
+                if (!isEqual(collection[i], condition, strictEquality)) {
                     return false;
                 }
             }
@@ -129,7 +144,7 @@ var log = console.log.bind(console);
         }
 
         // Otherwise it is not a collection
-        return isEqual(collection, condition);
+        return isEqual(collection, condition, strictEquality);
     }
 
     return eachof;
