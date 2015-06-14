@@ -5,7 +5,7 @@ var name    = 'eachof',
     version = '1.0.0',
     license = 'MIT',
 
-    description  = 'jQuery\'s .hide() extension, that adds an additional option to remove the element after it is hidden.',
+    description  = 'Iterate through the given collection and checks if the condition is met.',
     homepage     = 'https://github.com/richrdkng/eachof',
     authors      = [
         ['Richard King', 'richrdkng@gmail.com', 'https://github.com/richrdkng']
