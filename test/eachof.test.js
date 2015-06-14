@@ -545,6 +545,67 @@ describe('eachof ->', function() {
                 should( eachof(empty.arguments,                    1) ) .beFalse();
             });
         });
+        describe('when the condition is a function', function() {
+            var integers   = [1, 2, 3, 4, 5],
+                oddNumbers = [1, 3, 5, 7, 9],
+                strings    = ['1', '2', '3'];
+
+            it('should return true, when the condition is/conditions are met', function() {
+                // Regular usage
+                should( eachof(integers, function(index, value) {
+                    return value % 1 === 0;
+                })).beTrue();
+
+                should( eachof(oddNumbers, function(index, value) {
+                    return value % 2 === 1;
+                })).beTrue();
+
+                should( eachof(strings, function(index, value) {
+                    return value !== '';
+                })).beTrue();
+
+                // Alternative, short usage
+                should( eachof(integers, function() {
+                    return this % 1 === 0;
+                })).beTrue();
+
+                should( eachof(oddNumbers, function() {
+                    return this % 2 === 1;
+                })).beTrue();
+
+                should( eachof(strings, function() {
+                    return this !== '';
+                })).beTrue();
+            });
+
+            it('should return false, when the condition is/conditions are not met', function() {
+                // Regular usage
+                should( eachof(integers, function(index, value) {
+                    return value % 1 > 0;
+                })).beFalse();
+
+                should( eachof(oddNumbers, function(index, value) {
+                    return value % 2 === 0;
+                })).beFalse();
+
+                should( eachof(strings, function(index, value) {
+                    return value === '';
+                })).beFalse();
+
+                // Alternative, short usage
+                should( eachof(integers, function() {
+                    return this % 1 > 0;
+                })).beFalse();
+
+                should( eachof(oddNumbers, function() {
+                    return this % 2 === 0;
+                })).beFalse();
+
+                should( eachof(strings, function() {
+                    return this === '';
+                })).beFalse();
+            });
+        });
     });
 
     describe('for edge cases', function() {
@@ -569,7 +630,7 @@ describe('eachof ->', function() {
                 should( eachof('',        '') )       .beTrue();
             });
 
-            it('should return false, when they are scrictly not equal to each other ( !== )', function() {
+            it('should return false, when they are strictly not equal to each other ( !== )', function() {
                 should( eachof(undefined, null) )     .beFalse();
                 should( eachof(null,      undefined) ).beFalse();
                 should( eachof(0,         '0') )      .beFalse();
@@ -587,10 +648,8 @@ describe('eachof ->', function() {
         it('should return true', function() {
             var array = [1, 1, 1, 1, 1];
 
-            //xshould( true ).beFalse();
-            //should( eachof(array, 1          ), true );
-            //should( eachof(array, '1'       ), false );
-            //should( eachof(array, '1', false), false );
+            should( eachof(array, 1) )  .beTrue();
+            should( eachof(array, '1') ).beFalse();
         });
     });
 });
