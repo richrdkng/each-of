@@ -1,6 +1,5 @@
 // TODO: IE8 compatibility
 // TODO: recursive checking
-// TODO: function as a condition
 // TODO: multiple conditions / array condition / object condition / array-like condition
 // TODO: updated UMD
 /* TODO: NaN check:
@@ -73,7 +72,7 @@ var log = console.log.bind(console);
         return collection;
     }
 
-    function isEqual(element, condition, strictEquality) {
+    function isEqual(element, condition, strictEquality, index) {
         var elementIsNaN        = element !== element,
             conditionIsNaN      = condition !== condition,
             conditionIsFunction = typeof condition === 'function';
@@ -88,33 +87,39 @@ var log = console.log.bind(console);
             return true;
         }
 
-        if (strictEquality) {
-            // If they are strictly equal, return true
-            if (element === condition) {
-                return true;
+        if (!conditionIsFunction) {
+            if (strictEquality) {
+                // If they are strictly equal, return true
+                if (element === condition) {
+                    return true;
+                }
+            } else {
+                // If they are equal, return true
+                if (element == condition) {
+                    return true;
+                }
             }
-        } else {
-            // If they are equal, return true
-            if (element == condition) {
-                return true;
-            }
-        }
 
-        if (isCollection(condition)) {
-            for (var i = 0, length = condition.length; i < length; ++i) {
-                if (strictEquality) {
-                    if (element === condition[i]) {
-                        return true;
-                    }
-                } else {
-                    if (element == condition[i]) {
-                        return true;
+            if (isCollection(condition)) {
+                for (var i = 0, length = condition.length; i < length; ++i) {
+                    if (strictEquality) {
+                        if (element === condition[i]) {
+                            return true;
+                        }
+                    } else {
+                        if (element == condition[i]) {
+                            return true;
+                        }
                     }
                 }
             }
-        }
 
-        return false;
+            return false;
+
+        // Otherwise the condition is a function
+        } else {
+            return condition.call(element, index, element);
+        }
     }
 
     function eachof(collection, condition, strictEquality) {
@@ -135,7 +140,7 @@ var log = console.log.bind(console);
             }
 
             for (var i = 0, length = collection.length; i < length; ++i) {
-                if (!isEqual(collection[i], condition, strictEquality)) {
+                if (!isEqual(collection[i], condition, strictEquality, i)) {
                     return false;
                 }
             }
