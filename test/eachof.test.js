@@ -611,10 +611,14 @@ describe('eachof ->', function() {
     describe('for edge cases', function() {
         describe('when NaNs are invovled', function() {
             it('should return true, when the collection and the condition both are NaNs', function() {
-                should( eachof(NaN, NaN)).beTrue();
+                should( eachof(NaN, NaN) ).beTrue();
             });
             it('should return false, when the collection is NaN, but the condition isn\'t', function() {
-                should( eachof(NaN, true)).beFalse();
+                should( eachof(NaN, true) ).beFalse();
+            });
+            it('should return true, when the collection is all NaN and the condition is NaN', function() {
+                var NaNs = [NaN, NaN, NaN];
+                should( eachof(NaNs, NaN) ).beTrue();
             });
         });
 
@@ -650,6 +654,7 @@ describe('eachof ->', function() {
 
             should( eachof(array, 1) )  .beTrue();
             should( eachof(array, '1') ).beFalse();
+            should( eachof(array, '1', false) ).beTrue();
         });
     });
 });
