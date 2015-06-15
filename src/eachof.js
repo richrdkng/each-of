@@ -2,10 +2,6 @@
 // TODO: recursive checking
 // TODO: multiple conditions / array condition / object condition / array-like condition
 // TODO: updated UMD
-/* TODO: NaN check:
-    - when it is in a collection,
-    - also when it is the condition
-*/
 
 var log = console.log.bind(console);
 
